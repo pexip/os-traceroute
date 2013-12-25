@@ -1,10 +1,12 @@
 Source: traceroute
 Section: net
 Priority: important
-Maintainer: Daniel Baumann <daniel.baumann@progress-technologies.net>
+Maintainer: Pexip AS <packaging@pexip.com>
+XSBC-Pexip-Original-Maintainer: Daniel Baumann <daniel.baumann@progress-technologies.net>
 Build-Depends: debhelper (>= 8)
 Standards-Version: 3.9.2
 Homepage: http://traceroute.sourceforge.net/
+XS-Pexip-Upstream: http://archive.ubuntu.com/ubuntu/ precise
 
 Package: traceroute
 Architecture: any
