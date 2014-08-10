@@ -19,7 +19,7 @@
 
 
 #define DEF_RADB_SERVER		"whois.radb.net"
-#define DEF_RADB_SERVICE	"whois"
+#define DEF_RADB_SERVICE	"nicname"
 
 
 static sockaddr_any ra_addr = {{ 0, }, };

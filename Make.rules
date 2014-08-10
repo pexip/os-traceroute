@@ -55,10 +55,16 @@ $(call set, LIBS, )
 #  install stuff
 prefix = /usr/local
 
+ifneq ($(wildcard /lib64/libc.* /usr/lib64/libc.*),)
+lib := lib64
+else
+lib := lib
+endif
+
 exec_prefix = $(prefix)
 bindir = $(exec_prefix)/bin
 sbindir = $(exec_prefix)/sbin
-libdir = $(exec_prefix)/lib
+libdir = $(exec_prefix)/$(lib)
 libexecdir = $(exec_prefix)/libexec/$(NAME)
 sysconfdir = $(prefix)/etc
 includedir = $(prefix)/include
@@ -119,11 +125,11 @@ libraries = $(foreach dir, $(filter lib%,$(LIBDIRS)), $(srcdir)/$(dir))
 vpath lib%.so $(libraries)
 vpath lib%.a $(libraries)
 
-_libs = $(strip $(foreach lib,$(LIBDIRS),\
-		    $(if $(filter lib%,$(lib)),\
-			$(patsubst lib%,-l%,$(lib)),\
-			$(wildcard $(srcdir)/$(lib)/$(lib).so \
-					$(srcdir)/$(lib)/$(lib).a))))
+_libs = $(strip $(foreach _lib,$(LIBDIRS),\
+		    $(if $(filter lib%,$(_lib)),\
+			$(patsubst lib%,-l%,$(_lib)),\
+			$(wildcard $(srcdir)/$(_lib)/$(_lib).so \
+					$(srcdir)/$(_lib)/$(_lib).a))))
 
 override LIBS := $(_libs) -lm $(LIBS)
 

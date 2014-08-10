@@ -148,7 +148,7 @@ void error (const char *str) {
 void error_or_perm (const char *str) {
 
 	if (errno == EPERM)
-		fprintf (stderr, "You have no enough privileges to use "
+		fprintf (stderr, "You do not have enough privileges to use "
 				"this traceroute method.");
 	error (str);
 }
@@ -339,7 +339,7 @@ static void init_ip_options (void) {
 /*	Command line stuff	    */
 
 static int set_af (CLIF_option *optn, char *arg) {
-	int vers = (int) optn->data;
+	int vers = (long) optn->data;
 
 	if (vers == 4)  af = AF_INET;
 	else if (vers == 6)  af = AF_INET6;
@@ -537,6 +537,9 @@ static CLIF_option option_list[] = {
 	{ 0, "UL", 0, "Use UDPLITE for tracerouting (default dest port is "
 			    _TEXT(DEF_UDP_PORT) ")",
 			    set_module, "udplite", 0, CLIF_ONEDASH|CLIF_EXTRA },
+	{ "D", "dccp", 0, "Use DCCP Request for tracerouting (default "
+			    "port is " _TEXT(DEF_DCCP_PORT) ")",
+			    set_module, "dccp", 0, CLIF_EXTRA },
 	{ "P", "protocol", "prot", "Use raw packet of protocol %s "
 			    "for tracerouting", 
 			    set_raw, 0, 0, CLIF_EXTRA },
@@ -805,6 +808,15 @@ static void check_expired (probe *pb) {
 	   If we can detect/assume that it so, then just put "final"
 	   to the (pseudo-expired) "this" place.
 	*/
+
+	/*  It seems that the case of "answers for latest ones only"
+	   occurs mostly with icmp_unreach error answers ("!H" etc.).
+	   Icmp_echoreply, tcp_reset and even icmp_port_unreach looks
+	   like going in the right order.
+ 	*/
+	if (!fp->err_str[0])	/*  not an icmp_unreach error report...  */
+		return;
+
 
 	if (pfp ||
 	    (idx % probes_per_hop) + (fp - pb) < probes_per_hop
@@ -1335,10 +1347,9 @@ void recv_reply (int sk, int err, check_reply_t check_reply) {
 
 		    if (ee->ee_origin != SO_EE_ORIGIN_ICMP)
 			    ee = NULL;
-
 		    /*  dgram icmp sockets might return extra things...  */
-		    if (ee->ee_type == ICMP_SOURCE_QUENCH ||
-			ee->ee_type == ICMP_REDIRECT
+		    else if (ee->ee_type == ICMP_SOURCE_QUENCH ||
+			     ee->ee_type == ICMP_REDIRECT
 		    )  return;
 		}
 	    }

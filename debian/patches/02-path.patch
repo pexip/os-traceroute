@@ -1,4 +1,4 @@
-Author: Daniel Baumann <daniel.baumann@progress-technologies.net>
+Author: Daniel Baumann <mail@daniel-baumann.ch>
 Description: Adjust path.
 
 diff -Naurp traceroute.orig/wrappers/lft traceroute/wrappers/lft

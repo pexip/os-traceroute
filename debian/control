@@ -1,13 +1,13 @@
 Source: traceroute
 Section: net
 Priority: important
-Maintainer: Daniel Baumann <daniel.baumann@progress-technologies.net>
-Build-Depends: debhelper (>= 8)
-Standards-Version: 3.9.2
+Maintainer: Laszlo Boszormenyi (GCS) <gcs@debian.org>
+Build-Depends: debhelper (>= 9)
+Standards-Version: 3.9.5
 Homepage: http://traceroute.sourceforge.net/
 
 Package: traceroute
-Architecture: any
+Architecture: linux-any
 Depends: ${misc:Depends}, ${shlibs:Depends}
 Description: Traces the route taken by packets over an IPv4/IPv6 network
  The traceroute utility displays the route used by IP packets on their way to a

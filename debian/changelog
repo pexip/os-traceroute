@@ -1,3 +1,68 @@
+traceroute (1:2.0.20-2) unstable; urgency=medium
+
+  [ Graham Inggs <graham@nerve.org.za> ]
+  * Fix --mtu on recent kernels (closes: #757568).
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.org>  Sun, 10 Aug 2014 13:13:05 +0000
+
+traceroute (1:2.0.20-1) unstable; urgency=low
+
+  * New upstream release (closes: #751791), fixes segfault with --mtu
+    (closes: #750759).
+  * Update 05-manpage-p.patch , remove 07-hardening.patch as applied upstream.
+  * Make the package linux-only.
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.org>  Mon, 16 Jun 2014 17:11:12 +0000
+
+traceroute (1:2.0.19-4) unstable; urgency=low
+
+  * New maintainer (closes: #748489).
+  * Update Standards-Version to 3.9.5 .
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.org>  Sun, 18 May 2014 12:27:55 +0200
+
+traceroute (1:2.0.19-3) unstable; urgency=low
+
+  * Taking over with maintainer's consent.
+  * Adding watch file.
+
+ -- Luk Claes <luk@debian.org>  Sat, 06 Apr 2013 09:48:42 +0200
+
+traceroute (1:2.0.19-2) unstable; urgency=low
+
+  * Removing all references to my old email address.
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Sun, 10 Mar 2013 21:52:57 +0100
+
+traceroute (1:2.0.19-1) unstable; urgency=low
+
+  * Merging upstream version 2.0.19.
+  * Updating years in copyright file.
+  * Updating to standards version 3.9.4.
+  * Rediffing manpage-p.patch.
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Mon, 10 Dec 2012 11:50:54 +0100
+
+traceroute (1:2.0.18-3) unstable; urgency=low
+
+  * Updating GPL boilerplate in copyright file.
+  * Switching to xz compression.
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Sat, 30 Jun 2012 14:48:05 +0200
+
+traceroute (1:2.0.18-2) unstable; urgency=low
+
+  * Using compression level 9 also for binary packages.
+  * Updating package to standards version 3.9.3.
+  * Updating package to debhelper version 9.
+  * Adding patch to avoid overwriting build environment.
+  * Adding patch from Moritz Muehlenhoff <jmm@debian.org> to add missing
+    format strings in order to build with hardening flags.
+  * Enabling hardening build flags (Closes: #656014).
+  * Updating copyright file to machine-readable format version 1.0.
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Fri, 18 May 2012 12:53:18 +0200
+
 traceroute (1:2.0.18-1) unstable; urgency=low
 
   * Merging upstream version 2.0.18.
@@ -13,7 +78,7 @@ traceroute (1:2.0.18-1) unstable; urgency=low
   * Adding copyright stanza for libsupp/*.
   * Removing lintian overrides, not needed anymore.
 
- -- Daniel Baumann <daniel.baumann@progress-technologies.net>  Sun, 28 Aug 2011 20:04:09 +0200
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Sun, 28 Aug 2011 20:04:09 +0200
 
 traceroute (1:2.0.17-1) experimental; urgency=low
 
@@ -23,27 +88,27 @@ traceroute (1:2.0.17-1) experimental; urgency=low
   * Updating to standards version 3.9.1.
   * Removing traceroute-nanog transitional package.
 
- -- Daniel Baumann <daniel.baumann@progress-technologies.net>  Tue, 14 Dec 2010 19:29:54 +0100
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Tue, 14 Dec 2010 19:29:54 +0100
 
 traceroute (1:2.0.16-1) experimental; urgency=low
 
   * Merging upstream version 2.0.16.
 
- -- Daniel Baumann <daniel.baumann@progress-technologies.net>  Wed, 15 Sep 2010 08:46:54 +0200
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Wed, 15 Sep 2010 08:46:54 +0200
 
 traceroute (1:2.0.15-1) unstable; urgency=low
 
   * Merging upstream version 2.0.15.
   * Removing previously cherry-picked lftp.patch.
 
- -- Daniel Baumann <daniel.baumann@progress-technologies.net>  Sun, 18 Jul 2010 20:35:26 +0200
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Sun, 18 Jul 2010 20:35:26 +0200
 
 traceroute (1:2.0.14-3) unstable; urgency=low
 
   * Adding patch from upstream to add help argument to lft wrapper
     (Closes: #554892).
 
- -- Daniel Baumann <daniel.baumann@progress-technologies.net>  Tue, 13 Jul 2010 16:12:56 +0200
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Tue, 13 Jul 2010 16:12:56 +0200
 
 traceroute (1:2.0.14-2) unstable; urgency=low
 
@@ -54,7 +119,7 @@ traceroute (1:2.0.14-2) unstable; urgency=low
   * Updating manpage-lft.patch to add description about lft itself
     (Closes: #555028).
 
- -- Daniel Baumann <daniel.baumann@progress-technologies.net>  Mon, 12 Jul 2010 20:23:38 +0200
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Mon, 12 Jul 2010 20:23:38 +0200
 
 traceroute (1:2.0.14-1) unstable; urgency=low
 
@@ -65,19 +130,19 @@ traceroute (1:2.0.14-1) unstable; urgency=low
   * Updating year in copyright file.
   * Updating README.source.
 
- -- Daniel Baumann <daniel.baumann@progress-technologies.net>  Fri, 30 Apr 2010 05:29:21 +0200
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Fri, 30 Apr 2010 05:29:21 +0200
 
 traceroute (1:2.0.13-5) unstable; urgency=low
 
   * Shortening package short-description of traceroute-nanog.
 
- -- Daniel Baumann <daniel.baumann@progress-technologies.net>  Thu, 08 Apr 2010 07:20:43 +0200
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Thu, 08 Apr 2010 07:20:43 +0200
 
 traceroute (1:2.0.13-4) unstable; urgency=low
 
   * Setting priority of traceroute-nanog transitional package to extra.
 
- -- Daniel Baumann <daniel.baumann@progress-technologies.net>  Thu, 25 Feb 2010 16:48:48 +0100
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Thu, 25 Feb 2010 16:48:48 +0100
 
 traceroute (1:2.0.13-3) unstable; urgency=low
 
@@ -86,7 +151,7 @@ traceroute (1:2.0.13-3) unstable; urgency=low
   * Updating to standards 3.8.4.
   * Adding traceroute-nanog transitional package (Closes: #568316).
 
- -- Daniel Baumann <daniel.baumann@progress-technologies.net>  Sat, 06 Feb 2010 09:23:55 +0100
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Sat, 06 Feb 2010 09:23:55 +0100
 
 traceroute (2.0.13-2) unstable; urgency=low
 
@@ -99,14 +164,14 @@ traceroute (2.0.13-2) unstable; urgency=low
   * Using mkdir instead of install in rules.
   * Mentioning lft in traceroute manpage (Closes: #554891).
 
- -- Daniel Baumann <daniel.baumann@progress-technologies.net>  Sat, 07 Nov 2009 16:48:08 +0100
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Sat, 07 Nov 2009 16:48:08 +0100
 
 traceroute (2.0.13-1) unstable; urgency=low
 
   * Correcting wrong vcs-browser field.
   * Merging upstream version 2.0.13.
 
- -- Daniel Baumann <daniel.baumann@progress-technologies.net>  Fri, 06 Nov 2009 08:26:37 +0100
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Fri, 06 Nov 2009 08:26:37 +0100
 
 traceroute (2.0.12-3) unstable; urgency=low
 
@@ -121,7 +186,7 @@ traceroute (2.0.12-3) unstable; urgency=low
   * Sorting depends.
   * Bumping versioned build-depends on quilt.
 
- -- Daniel Baumann <daniel.baumann@progress-technologies.net>  Sun, 04 Oct 2009 10:20:00 +0200
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Sun, 04 Oct 2009 10:20:00 +0200
 
 traceroute (2.0.12-2) unstable; urgency=low
 
@@ -136,7 +201,7 @@ traceroute (2.0.12-2) unstable; urgency=low
     option_list (Closes: #518535).
   * Updating year in copyright.
 
- -- Daniel Baumann <daniel.baumann@progress-technologies.net>  Mon, 06 Apr 2009 13:45:00 +0200
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Mon, 06 Apr 2009 13:45:00 +0200
 
 traceroute (2.0.12-1) unstable; urgency=low
 
@@ -144,14 +209,14 @@ traceroute (2.0.12-1) unstable; urgency=low
   * Merging upstream version 2.0.12.
   * Adding lintian overrides.
 
- -- Daniel Baumann <daniel.baumann@progress-technologies.net>  Wed, 17 Sep 2008 22:38:00 +0200
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Wed, 17 Sep 2008 22:38:00 +0200
 
 traceroute (2.0.11-2) unstable; urgency=medium
 
   * Updating upstream URL.
   * Updating to standards 3.8.0.
 
- -- Daniel Baumann <daniel.baumann@progress-technologies.net>  Fri, 20 Jun 2008 18:34:00 +0200
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Fri, 20 Jun 2008 18:34:00 +0200
 
 traceroute (2.0.11-1) unstable; urgency=medium
 
@@ -164,13 +229,13 @@ traceroute (2.0.11-1) unstable; urgency=medium
   * Upgrading package to debhelper 7.
   * Merging upstream version 2.0.11.
 
- -- Daniel Baumann <daniel.baumann@progress-technologies.net>  Sat, 03 May 2008 09:26:00 +0200
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Sat, 03 May 2008 09:26:00 +0200
 
 traceroute (2.0.10-1) unstable; urgency=low
 
   * New upstream release.
 
- -- Daniel Baumann <daniel.baumann@progress-technologies.net>  Mon, 21 Apr 2008 12:20:00 +0200
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Mon, 21 Apr 2008 12:20:00 +0200
 
 traceroute (2.0.9-4) unstable; urgency=low
 
@@ -178,77 +243,77 @@ traceroute (2.0.9-4) unstable; urgency=low
   * Update standards version.
   * Removed TODO; all done.
 
- -- Daniel Baumann <daniel.baumann@progress-technologies.net>  Sun, 23 Dec 2007 11:10:00 +0100
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Sun, 23 Dec 2007 11:10:00 +0100
 
 traceroute (2.0.9-3) unstable; urgency=low
 
   * Applying patch from Neil Williams <codehelp@debian.org> to add cross build
     support (Closes: #451851).
 
- -- Daniel Baumann <daniel.baumann@progress-technologies.net>  Sun, 18 Nov 2007 22:58:00 +0100
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Sun, 18 Nov 2007 22:58:00 +0100
 
 traceroute (2.0.9-2) unstable; urgency=medium
 
   * Adding versioned conflict against traceroute-nanog (Closes: #446305).
 
- -- Daniel Baumann <daniel.baumann@progress-technologies.net>  Thu, 11 Oct 2007 23:49:00 +0200
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Thu, 11 Oct 2007 23:49:00 +0200
 
 traceroute (2.0.9-1) unstable; urgency=low
 
   * New upstream release.
 
- -- Daniel Baumann <daniel.baumann@progress-technologies.net>  Tue, 09 Oct 2007 11:20:00 +0200
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Tue, 09 Oct 2007 11:20:00 +0200
 
 traceroute (2.0.9~rc1-1) unstable; urgency=medium
 
   * New upstream release.
 
- -- Daniel Baumann <daniel.baumann@progress-technologies.net>  Fri, 07 Sep 2007 23:36:00 +0200
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Fri, 07 Sep 2007 23:36:00 +0200
 
 traceroute (2.0.8-1) unstable; urgency=low
 
   * New upstream release.
 
- -- Daniel Baumann <daniel.baumann@progress-technologies.net>  Tue, 04 Sep 2007 21:48:00 +0200
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Tue, 04 Sep 2007 21:48:00 +0200
 
 traceroute (2.0.8~rc2-1) unstable; urgency=low
 
   * New upstream release.
   * Added forgotten symlinks for traceroute6 (Closes: #439782).
 
- -- Daniel Baumann <daniel.baumann@progress-technologies.net>  Wed, 29 Aug 2007 07:49:00 +0200
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Wed, 29 Aug 2007 07:49:00 +0200
 
 traceroute (2.0.8~rc1-1) unstable; urgency=low
 
   * New upstream release.
 
- -- Daniel Baumann <daniel.baumann@progress-technologies.net>  Sat, 25 Aug 2007 08:28:00 +0200
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Sat, 25 Aug 2007 08:28:00 +0200
 
 traceroute (2.0.7-4) unstable; urgency=low
 
   * Complying with policy (Closes: #436698, #437815).
 
- -- Daniel Baumann <daniel.baumann@progress-technologies.net>  Tue, 15 Aug 2007 21:51:00 +0200
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Tue, 15 Aug 2007 21:51:00 +0200
 
 traceroute (2.0.7-3) unstable; urgency=low
 
   * Added conflicts/replaces to tcptraceroute (Closes: #436648).
   * Added conflicts/replaces to iputils-tracepath (Closes: #436698).
 
- -- Daniel Baumann <daniel.baumann@progress-technologies.net>  Wed, 08 Aug 2007 22:09:00 +0200
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Wed, 08 Aug 2007 22:09:00 +0200
 
 traceroute (2.0.7-2) unstable; urgency=low
 
   * Including tcptracroute wrapper script.
 
- -- Daniel Baumann <daniel.baumann@progress-technologies.net>  Wed, 08 Aug 2007 02:05:00 +0200
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Wed, 08 Aug 2007 02:05:00 +0200
 
 traceroute (2.0.7-1) unstable; urgency=low
 
   * Replacing traceroute from BSD with traceroute from Dmitry K. Butskoy.
   * Dropping obsolete alternatives.
 
- -- Daniel Baumann <daniel.baumann@progress-technologies.net>  Wed, 08 Aug 2007 01:16:00 +0200
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Wed, 08 Aug 2007 01:16:00 +0200
 
 traceroute (1.4a12-21) unstable; urgency=low
 
@@ -256,7 +321,7 @@ traceroute (1.4a12-21) unstable; urgency=low
   * Adjusted package to my own packaging style.
   * Bumped policy version.
 
- -- Daniel Baumann <daniel.baumann@progress-technologies.net>  Thu, 23 Nov 2006 21:37:00 +0100
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Thu, 23 Nov 2006 21:37:00 +0100
 
 traceroute (1.4a12-20) unstable; urgency=medium
 

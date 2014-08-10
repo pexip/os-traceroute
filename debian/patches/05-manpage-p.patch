@@ -1,18 +1,18 @@
-Author: Daniel Baumann <daniel.baumann@progress-technologies.net>
+Author: Daniel Baumann <mail@daniel-baumann.ch>
 Description:
  Mentioning that -p with the tcptraceroute wrapper specifies the source port,
  not the destination port (Closes: #448200).
 
-diff -Naurp traceroute.orig//traceroute/traceroute.8 traceroute/traceroute/traceroute.8
---- traceroute.orig//traceroute/traceroute.8	2010-07-12 20:05:38.630891185 +0200
-+++ traceroute/traceroute/traceroute.8	2010-07-12 20:05:22.586936647 +0200
-@@ -208,7 +208,8 @@ For ICMP tracing, specifies the initial
+diff -Naurp traceroute.orig/traceroute/traceroute.8 traceroute/traceroute/traceroute.8
+--- traceroute.orig/traceroute/traceroute.8	2012-12-10 11:49:37.056140846 +0100
++++ traceroute/traceroute/traceroute.8	2012-12-10 11:49:46.172143321 +0100
+@@ -216,7 +216,8 @@ For ICMP tracing, specifies the initial
  by each probe too).
  .br
- For TCP specifies just the (constant) destination
+ For TCP and others specifies just the (constant) destination
 -port to connect.
 +port to connect. When using the tcptraceroute wrapper,
 +\-p specifies the source port.
  .TP
- .BI \-t " tos
+ .BI \-t " tos" ", --tos=" tos
  For IPv4, set the Type of Service (TOS) and Precedence value. Useful values
