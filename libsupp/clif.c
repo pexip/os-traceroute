@@ -1177,7 +1177,7 @@ static int set_int (int *data, char *arg) {
 
 	*data = (int) strtol (arg, &q, 0);
 
-	return  (q == arg) ? -1 : 0;
+	return  (q == arg || *q) ? -1 : 0;
 }
 
 static int set_uint (unsigned int *data, char *arg) {
@@ -1187,7 +1187,7 @@ static int set_uint (unsigned int *data, char *arg) {
 
 	*data = (unsigned int) strtoul (arg, &q, 0);
 
-	return  (q == arg) ? -1 : 0;
+	return  (q == arg || *q) ? -1 : 0;
 }
 
 static int set_double (double *data, char *arg) {
@@ -1197,7 +1197,7 @@ static int set_double (double *data, char *arg) {
 
 	*data = strtod (arg, &q);
 
-	return  (q == arg) ? -1 : 0;
+	return  (q == arg || *q) ? -1 : 0;
 }
 
 

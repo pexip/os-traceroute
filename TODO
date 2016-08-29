@@ -4,15 +4,6 @@
   think about it immediately after that... :)
 
 
-* Tune default parameters properly.
-
-  Maybe decrease `-w' secs to 4.0 instead of 5.0 (as Network is faster now).
-
-
-* Verbose output. Show method in use, what ports we are connecting to,
-  more info about icmp response etc.
-
-
 * The "final hop" issue.
 
   All methods, usable when firewalls are present in the network path,
@@ -39,17 +30,4 @@
   way as if it is a final hop.
 
   For IPv6 mtrace, there is an RFC draft for this already...
-
-
-* Make the output more clean -- use two spaces before any printed address
-  (not the first one only), and use two spaces between expired probes as well.
-
-
-* Maybe implement some config file (both user and system-wide), 
-  with directives (auto)generated from the general-type long-options.
-  This could allow people to tune default parameters.
-
-  The presence of such files even makes it reasonable to add some more
-  long-options (fe. to tune the form of output), as the user can specify
-  it in configfile just at once.
 

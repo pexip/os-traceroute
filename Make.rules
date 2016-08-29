@@ -120,6 +120,14 @@ LIBDIRS := $(filter-out $(LIBLAST),$(LIBDIRS)) $(filter $(LIBDIRS),$(LIBLAST))
 
 
 includes = $(foreach dir, $(INCLUDEDIRS) $(LIBDIRS), $(srcdir)/$(dir))
+
+ifneq ($(gcc),)
+CPATH = $(subst $(empty) ,:,$(includes))
+export CPATH
+else
+override CPPFLAGS += $(patsubst %,-I%,$(includes))
+endif
+
 libraries = $(foreach dir, $(filter lib%,$(LIBDIRS)), $(srcdir)/$(dir))
 
 vpath lib%.so $(libraries)
@@ -133,12 +141,10 @@ _libs = $(strip $(foreach _lib,$(LIBDIRS),\
 
 override LIBS := $(_libs) -lm $(LIBS)
 
-ifneq ($(gcc),)
-CPATH = $(subst $(empty) ,:,$(includes))
+ifeq ($(CC),gcc)
 LIBRARY_PATH = $(subst $(empty) ,:,$(libraries))
-export CPATH LIBRARY_PATH
+export LIBRARY_PATH
 else
-override CPPFLAGS += $(patsubst %,-I%,$(includes))
 override LIBS += $(patsubst %,-L%,$(libraries))
 endif
 

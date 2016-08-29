@@ -12,7 +12,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/socket.h>
-#include <sys/poll.h>
+#include <poll.h>
 #include <netinet/icmp6.h>
 #include <netinet/ip_icmp.h>
 #include <netinet/in.h>
@@ -52,6 +52,14 @@
 #define IPV6_PMTUDISC_PROBE 3
 #endif
 
+#ifndef AI_IDN
+#define AI_IDN	0
+#endif
+
+#ifndef NI_IDN
+#define NI_IDN	0
+#endif
+
 
 #define MAX_HOPS	255
 #define MAX_PROBES	10
@@ -61,6 +69,11 @@
 #define DEF_SIM_PROBES	16	/*  including several hops   */
 #define DEF_NUM_PROBES	3
 #define DEF_WAIT_SECS	5.0
+#define DEF_HERE_FACTOR	3
+#define DEF_NEAR_FACTOR	10
+#ifndef DEF_WAIT_PREC
+#define DEF_WAIT_PREC	0.001	/*  +1 ms  to avoid precision issues   */
+#endif
 #define DEF_SEND_SECS	0
 #define DEF_DATA_LEN	40	/*  all but IP header...  */
 #define MAX_PACKET_LEN	65000
@@ -72,8 +85,8 @@
 
 
 static char version_string[] = "Modern traceroute for Linux, "
-				"version " _TEXT(VERSION) ", " __DATE__
-				"\nCopyright (c) 2008  Dmitry Butskoy, "
+				"version " _TEXT(VERSION)
+				"\nCopyright (c) 2016  Dmitry Butskoy, "
 				"  License: GPL v2 or any later";
 static int debug = 0;
 static unsigned int first_hop = 1;
@@ -101,6 +114,8 @@ static int noroute = 0;
 static unsigned int fwmark = 0;
 static int packet_len = -1;
 static double wait_secs = DEF_WAIT_SECS;
+static double here_factor = DEF_HERE_FACTOR;
+static double near_factor = DEF_NEAR_FACTOR;
 static double send_secs = DEF_SEND_SECS;
 static int mtudisc = 0;
 static int backward = 0;
@@ -325,7 +340,7 @@ static void init_ip_options (void) {
 	    rth->ip6r_type = ipv6_rthdr_type;
 	    rth->ip6r_segleft = num_gateways;
 
-	    *((u_int32_t *) (rth + 1)) = 0;
+	    *((uint32_t *) (rth + 1)) = 0;
 
 	    in6 = (struct in6_addr *) (rtbuf + 8);
 	    for (i = 0; i < num_gateways; i++)
@@ -429,6 +444,26 @@ static int set_raw (CLIF_option *optn, char *arg) {
 }
 
 
+static int set_wait_specs (CLIF_option *optn, char *arg) {
+	char *p, *q;
+
+	here_factor = near_factor = 0;
+
+	wait_secs = strtod (p = arg, &q);
+	if (q == p)  return -1;
+	if (!*q++)  return 0;
+
+	here_factor = strtod (p = q, &q);
+	if (q == p)  return -1;
+	if (!*q++)  return 0;
+
+	near_factor = strtod (p = q, &q);
+	if (q == p || *q)  return -1;
+
+	return 0;
+}
+
+
 static int set_host (CLIF_argument *argm, char *arg, int index) {
 
 	if (getaddr (arg, &dst_addr) < 0)
@@ -488,11 +523,14 @@ static CLIF_option option_list[] = {
 			    CLIF_set_uint, &tos, 0, 0 },
 	{ "l", "flowlabel", "flow_label", "Use specified %s for IPv6 packets",
 			    CLIF_set_uint, &flow_label, 0, 0 },
-	{ "w", "wait", "waittime", "Set the number of seconds to wait for "
-			    "response to a probe (default is "
-			    _TEXT(DEF_WAIT_SECS) "). Non-integer (float point) "
-			    "values allowed too",
-			    CLIF_set_double, &wait_secs, 0, 0 },
+	{ "w", "wait", "MAX,HERE,NEAR", "Wait for a probe no more than HERE "
+			    "(default " _TEXT(DEF_HERE_FACTOR) ") times longer "
+			    "than a response from the same hop, or no more "
+			    "than NEAR (default " _TEXT(DEF_NEAR_FACTOR) ") "
+			    "times than some next hop, or MAX (default "
+			    _TEXT(DEF_WAIT_SECS) ") seconds "
+			    "(float point values allowed too)",
+			    set_wait_specs, 0, 0, 0 },
 	{ "q", "queries", "nqueries", "Set the number of probes per each hop. "
 			    "Default is " _TEXT(DEF_NUM_PROBES),
 			    CLIF_set_uint, &probes_per_hop, 0, 0 },
@@ -590,8 +628,9 @@ int main (int argc, char *argv[]) {
 		ex_error ("max hops cannot be more than " _TEXT(MAX_HOPS));
 	if (!probes_per_hop || probes_per_hop > MAX_PROBES)
 		ex_error ("no more than " _TEXT(MAX_PROBES) " probes per hop");
-	if (wait_secs < 0)
-		ex_error ("bad wait seconds `%g' specified", wait_secs);
+	if (wait_secs < 0 || here_factor < 0 || near_factor < 0)
+		ex_error ("bad wait specifications `%g,%g,%g' used",
+				    wait_secs, here_factor, near_factor);
 	if (packet_len > MAX_PACKET_LEN)
 		ex_error ("too big packetlen %d specified", packet_len);
 	if (src_addr.sa.sa_family && src_addr.sa.sa_family != af)
@@ -606,12 +645,14 @@ int main (int argc, char *argv[]) {
 		    htonl (((tos & 0xff) << 20) | (flow_label & 0x000fffff));
 
 	if (src_port) {
-	    src_addr.sin.sin_port = htons ((u_int16_t) src_port);
+	    src_addr.sin.sin_port = htons ((uint16_t) src_port);
 	    src_addr.sa.sa_family = af;
 	}
 
-	if (src_port || ops->one_per_time)
+	if (src_port || ops->one_per_time) {
 		sim_probes = 1;
+		here_factor = near_factor = 0;
+	}
 
 
 	/*  make sure we don't std{in,out,err} to open sockets  */
@@ -760,6 +801,45 @@ static void print_probe (probe *pb) {
 static void print_end (void) {
 
 	printf ("\n");
+}
+
+
+/*	Compute  timeout  stuff		*/
+
+static double get_timeout (probe *pb) {
+	double value;
+
+	if (here_factor) {
+	    /*  check for already replied from the same hop   */
+	    int i, idx = (pb - probes);
+	    probe *p = &probes[idx - (idx % probes_per_hop)];
+
+	    for (i = 0; i < probes_per_hop; i++, p++) {
+		/*   `p == pb' skipped since  !pb->done   */
+
+		if (p->done && (value = p->recv_time - p->send_time) > 0) {
+		    value += DEF_WAIT_PREC;
+		    value *= here_factor;
+		    return  value < wait_secs ? value : wait_secs;
+		}
+	    }
+	}
+
+	if (near_factor) {
+	    /*  check forward for already replied   */
+	    probe *p, *endp = probes + num_probes;
+
+	    for (p = pb + 1; p < endp && p->send_time; p++) {
+
+		if (p->done && (value = p->recv_time - p->send_time) > 0) {
+		    value += DEF_WAIT_PREC;
+		    value *= near_factor;
+		    return  value < wait_secs ? value : wait_secs;
+		}
+	    }
+	}
+
+	return wait_secs;
 }
 
 
@@ -944,19 +1024,25 @@ static void do_it (void) {
 
 	while (start < end) {
 	    int n, num = 0;
-	    double max_time = 0;
+	    double next_time = 0;
 	    double now_time = get_time ();
 
 
 	    for (n = start; n < end; n++) {
 		probe *pb = &probes[n];
 
-		if (!pb->done &&
-		    pb->send_time &&
-		    now_time - pb->send_time >= wait_secs
+
+		if (n == start &&		/*  probably time to print...  */
+		    !pb->done && pb->send_time	/*  ...but yet not replied   */
 		) {
-		    ops->expire_probe (pb);
-		    check_expired (pb);
+		    double expire_time = pb->send_time + get_timeout (pb);
+
+		    if (expire_time > now_time)
+			    next_time = expire_time;
+		    else {
+			ops->expire_probe (pb);
+			check_expired (pb);
+		    }
 		}
 
 
@@ -976,9 +1062,10 @@ static void do_it (void) {
 
 		if (!pb->send_time) {
 		    int ttl;
+		    double next;
 
-		    if (send_secs && (now_time - last_send) < send_secs) {
-			max_time = (last_send + send_secs) - wait_secs;
+		    if (send_secs && (next = last_send + send_secs) > now_time) {
+			next_time = next;
 			break;
 		    }
 
@@ -987,7 +1074,7 @@ static void do_it (void) {
 		    ops->send_probe (pb, ttl);
 
 		    if (!pb->send_time) {
-			if (max_time)  break;	/*  have chances later   */
+			if (next_time)  break;	/*  have chances later   */
 			else  error ("send probe");
 		    }
 
@@ -995,16 +1082,16 @@ static void do_it (void) {
 		}
 
 
-		if (pb->send_time > max_time)
-			max_time = pb->send_time;
+		if (!next_time)
+		    next_time = pb->send_time + get_timeout (pb);
 
 		num++;
 		if (num >= sim_probes)  break;
 	    }
 
 
-	    if (max_time) {
-		double timeout = (max_time + wait_secs) - now_time;
+	    if (next_time) {
+		double timeout = next_time - get_time ();
 
 		if (timeout < 0)  timeout = 0;
 
@@ -1252,6 +1339,19 @@ void parse_icmp_res (probe *pb, int type, int code, int info) {
 }
 
 
+static void parse_local_res (probe *pb, int ee_errno, int info) {
+
+	if (ee_errno == EMSGSIZE && info != 0) {
+	    snprintf (pb->err_str, sizeof(pb->err_str)-1, "!F-%d", info);
+	    pb->final = 1;
+	    return;
+	}
+
+	errno = ee_errno;
+	error ("local recverr");
+}
+
+
 void probe_done (probe *pb) {
 
 	if (pb->sk) {
@@ -1321,7 +1421,17 @@ void recv_reply (int sk, int err, check_reply_t check_reply) {
 
 
 	pb = check_reply (sk, err, &from, bufp, n);
-	if (!pb)  return;
+	if (!pb) {
+
+	    /*  for `frag needed' case at the local host,
+		kernel >= 3.13 sends local error (no more icmp)
+	    */
+	    if (!n && err && dontfrag) {
+		pb = &probes[(first_hop - 1) * probes_per_hop];
+		if (pb->done)  return;
+	    } else
+		return;
+	}
 
 
 	/*  Parse CMSG stuff   */
@@ -1345,11 +1455,14 @@ void recv_reply (int sk, int err, check_reply_t check_reply) {
 
 		    ee = (struct sock_extended_err *) ptr;
 
-		    if (ee->ee_origin != SO_EE_ORIGIN_ICMP)
-			    ee = NULL;
+		    if (ee->ee_origin != SO_EE_ORIGIN_ICMP &&
+			ee->ee_origin != SO_EE_ORIGIN_LOCAL
+		    )  return;
+
 		    /*  dgram icmp sockets might return extra things...  */
-		    else if (ee->ee_type == ICMP_SOURCE_QUENCH ||
-			     ee->ee_type == ICMP_REDIRECT
+		    if (ee->ee_origin == SO_EE_ORIGIN_ICMP &&
+			(ee->ee_type == ICMP_SOURCE_QUENCH ||
+			 ee->ee_type == ICMP_REDIRECT)
 		    )  return;
 		}
 	    }
@@ -1361,8 +1474,9 @@ void recv_reply (int sk, int err, check_reply_t check_reply) {
 
 		    ee = (struct sock_extended_err *) ptr;
 
-		    if (ee->ee_origin != SO_EE_ORIGIN_ICMP6)
-			    ee = NULL;
+		    if (ee->ee_origin != SO_EE_ORIGIN_ICMP6 &&
+			ee->ee_origin != SO_EE_ORIGIN_LOCAL
+		    )  return;
 		}
 	    }
 	}
@@ -1378,10 +1492,13 @@ void recv_reply (int sk, int err, check_reply_t check_reply) {
 
 	pb->recv_ttl = recv_ttl;
 
-	if (ee) {
+	if (ee && ee->ee_origin != SO_EE_ORIGIN_LOCAL) {    /*  icmp or icmp6   */
 	    memcpy (&pb->res, SO_EE_OFFENDER (ee), sizeof(pb->res));
 	    parse_icmp_res (pb, ee->ee_type, ee->ee_code, ee->ee_info);
 	}
+
+	if (ee && ee->ee_origin == SO_EE_ORIGIN_LOCAL)
+		parse_local_res (pb, ee->ee_errno, ee->ee_info);
 
 
 	if (ee &&
@@ -1529,7 +1646,7 @@ int do_send (int sk, const void *data, size_t len, const sockaddr_any *addr) {
 	    if (errno == ENOBUFS || errno == EAGAIN)
 		    return res;
 	    if (errno == EMSGSIZE)
-		    return 0;	/*  icmp will say more...  */
+		    return 0;	/*  recverr will say more...  */
 	    error ("send");	/*  not recoverable   */
 	}
 
