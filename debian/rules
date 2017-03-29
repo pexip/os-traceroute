@@ -1,9 +1,12 @@
 #!/usr/bin/make -f
+# -*- makefile -*-
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
 
 SHELL := sh -e
 
-%:
-	dh ${@}
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
 
 override_dh_auto_install:
 	install -D -m 0755 traceroute/traceroute debian/traceroute/usr/bin/traceroute.db
@@ -38,3 +41,11 @@ override_dh_auto_install:
 		install -D -m 0755 wrappers/$${_WRAPPER} debian/traceroute/usr/sbin/$${_WRAPPER}.db; \
 		ln -s ../man1/traceroute.db.1.gz debian/traceroute/usr/share/man/man8/$${_WRAPPER}.db.8.gz; \
 	done
+
+override_dh_builddeb:
+	dh_builddeb -- -Zxz -z9
+
+%:
+	dh ${@} --parallel
+
+.PHONY: override_dh_auto_install override_dh_builddeb

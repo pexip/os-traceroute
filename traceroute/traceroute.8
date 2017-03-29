@@ -16,10 +16,10 @@ traceroute \- print the route packets trace to network host
 .BR "" [ "-q nqueries" "] [" "-N squeries" "] [" "-t tos" ]
 .br
 .ti +8
-.BR "" [ "-l flow_label" "] [" "-w waittime" "] [" "-z sendwait" ]
+.BR "" [ "-l flow_label" "] [" "-w waittime" "] [" "-z sendwait" "] [" "-UL" "] [" "-D" ]
 .br
 .ti +8
-.BR "" [ "-UL" "] [" "-P proto" "] [" "--sport=port" "] [" "-M method" "] [" "-O mod_options" ]
+.BR "" [ "-P proto" "] [" "--sport=port" "] [" "-M method" "] [" "-O mod_options" ]
 .br
 .ti +8
 .BR "" [ "--mtu" "] [" "--back" ]
@@ -115,16 +115,16 @@ IPv4 and IPv6 addresses,
 .I traceroute
 will use IPv4.
 .TP
-.B \-I
+.B \-I, \-\-icmp
 Use ICMP ECHO for probes
 .TP
-.B \-T
+.B \-T, \-\-tcp
 Use TCP SYN for probes
 .TP
-.B \-d
+.B \-d, --debug
 Enable socket level debugging (when the Linux kernel supports it)
 .TP
-.B \-F
+.B \-F, --dont-fragment
 Do not fragment probe packets. (For IPv4 it also sets DF bit, which tells
 intermediate routers not to fragment remotely as well).
 .br
@@ -148,10 +148,10 @@ Before that version, IPv6 was always fragmented, IPv4 could use
 the once the discovered final mtu only (from the route cache), which can be
 less than the actual mtu of a device.
 .TP
-.BI \-f " first_ttl
+.BI \-f " first_ttl" ", --first=" first_ttl
 Specifies with what TTL to start. Defaults to 1.
 .TP
-.BI \-g " gateway
+.BI \-g " gateway" ", --gateway=" gateway
 Tells traceroute to add an IP source routing option to the outgoing
 packet that tells the network to route the packet through the
 specified
@@ -166,18 +166,18 @@ is allowed, where
 is a route header type (default is type 2). Note the type 0 route header
 is now deprecated (rfc5095).
 .TP
-.BI \-i " interface
+.BI \-i " interface" ", --interface=" interface
 Specifies the interface through which
 .I traceroute
 should send packets. By default, the interface is selected
 according to the routing table.
 .TP
-.BI \-m " max_ttl
+.BI \-m " max_ttl" ", --max-hops=" max_ttl
 Specifies the maximum number of hops (max time-to-live value)
 .I traceroute
 will probe. The default is 30.
 .TP
-.BI \-N " squeries
+.BI \-N " squeries" ", --sim-queries=" squeries
 Specifies the number of probe packets sent out simultaneously.
 Sending several probes concurrently can speed up
 .I traceroute
@@ -189,7 +189,7 @@ a situation specifying too large number can lead to loss of some responses.
 .BI \-n
 Do not try to map IP addresses to host names when displaying them.
 .TP
-.BI \-p " port
+.BI \-p " port" ", --port=" port
 For UDP tracing, specifies the destination port base
 .I traceroute
 will use (the destination port number will be incremented by each probe).
@@ -197,20 +197,23 @@ will use (the destination port number will be incremented by each probe).
 For ICMP tracing, specifies the initial ICMP sequence value (incremented
 by each probe too).
 .br
-For TCP specifies just the (constant) destination
+For TCP and others specifies just the (constant) destination
 port to connect.
 .TP
-.BI \-t " tos
+.BI \-t " tos" ", --tos=" tos
 For IPv4, set the Type of Service (TOS) and Precedence value. Useful values
 are 16 (low delay) and 8 (high throughput). Note that in order to use
 some TOS precedence values, you have to be super user.
 .br
 For IPv6, set the Traffic Control value.
 .TP
-.BI \-w " waittime
+.BI \-l " flow_label" ", --flowlabel=" flow_label
+Use specified flow_label for IPv6 packets.
+.TP
+.BI \-w " waittime" ", --wait=" waittime
 Set the time (in seconds) to wait for a response to a probe (default 5.0 sec).
 .TP
-.BI \-q " nqueries
+.BI \-q " nqueries" ", --queries=" nqueries
 Sets the number of probe packets per hop. The default is 3.
 .TP
 .BI \-r
@@ -219,18 +222,18 @@ an attached network.  If the host is not on a directly-attached
 network, an error is returned.  This option can be used to ping a
 local host through an interface that has no route through it.
 .TP
-.BI \-s " source_addr
+.BI \-s " source_addr" ", --source=" source_addr
 Chooses an alternative source address. Note that you must select the
 address of one of the interfaces.
 By default, the address of the outgoing interface is used.
 .TP
-.BI \-z " sendwait
+.BI \-z " sendwait" ", --sendwait=" sendwait
 Minimal time interval between probes (default 0).
 If the value is more than 10, then it specifies a number in milliseconds,
 else it is a number of seconds (float point values allowed too).
 Useful when some routers use rate-limit for ICMP messages.
 .TP
-.BI \-e
+.B \-e, \-\-extensions
 Show ICMP extensions (rfc4884). The general form is
 .I CLASS\fB/\fITYPE\fB:
 followed by a hexadecimal dump.
@@ -240,11 +243,11 @@ The MPLS (rfc4950) is shown parsed, in a form:
 .B /
 ).
 .TP
-.BI \-A
+.B \-A, \-\-as\-path\-lookups
 Perform AS path lookups in routing registries and print results
 directly after the corresponding addresses.
 .TP
-.BI \-V
+.B \-V, \-\-version
 Print the version and exit.
 .br
 .P
@@ -259,7 +262,7 @@ Normally source ports (if applicable) are chosen by the system.
 .B \--fwmark\fR=\fImark
 Set the firewall mark for outgoing packets (since the Linux kernel 2.6.25).
 .TP
-.BI \-M " method
+.BI \-M " method" ", --module=" name
 Use specified method for traceroute operations. Default traditional udp method
 has name
 .IR default ,
@@ -279,7 +282,7 @@ Most methods have their simple shortcuts,
 .BR "" ( "-I " means " -M icmp" ,
 etc).
 .TP
-.BI \-O " option
+.BI \-O " option" ", --options=" options
 Specifies some method-specific option. Several options are separated by comma (or use several
 .B \-O
 on cmdline).
@@ -287,14 +290,17 @@ Each method may have its own specific options, or many not have them at all.
 To print information about available options, use
 .BR \-O\ help .
 .TP
-.BI \-U
+.B \-U, \-\-udp
 Use UDP to particular destination port for tracerouting (instead of increasing
 the port per each probe). Default port is 53 (dns).
 .TP
 .BI \-UL
 Use UDPLITE for tracerouting (default port is 53).
 .TP
-.BI \-P " protocol
+.B \-D, \-\-dccp
+Use DCCP Requests for probes.
+.TP
+.BI \-P " protocol" ", --protocol=" protocol
 Use raw packet of specified protocol for tracerouting. Default protocol is
 253 (rfc3692).
 .TP
@@ -463,6 +469,18 @@ Options:
 .B coverage\fR=\fInum
 Set udplite send coverage to
 .IR num .
+.SS dccp \  \ \-D
+Use DCCP Request packets for probes (rfc4340).
+.P
+This method uses the same "half-open technique" as used for TCP.
+The default destination port is 33434.
+.P
+Options:
+.TP
+.B service\fR=\fInum
+Set DCCP service code to
+.IR num
+(default is 1885957735).
 .SS raw \  \  \  \ \-P proto
 Send raw packet of protocol
 .IR proto .

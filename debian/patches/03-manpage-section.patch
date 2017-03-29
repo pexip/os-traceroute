@@ -1,4 +1,4 @@
-Author: Daniel Baumann <daniel.baumann@progress-technologies.net>
+Author: Daniel Baumann <mail@daniel-baumann.ch>
 Description: Adjust manpage section.
 
 diff -Naurp traceroute.orig/traceroute/traceroute.8 traceroute/traceroute/traceroute.8

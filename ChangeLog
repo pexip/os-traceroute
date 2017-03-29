@@ -1,3 +1,27 @@
+2014-06-14  Dmitry Butskoy  <Dmitry@Butskoy.name> - 2.0.20
+
+	*  Describe all complementary long options in the man page (Jan Synacek)
+
+	*  Use correct service name for AS lookups (Frederic Mangano)
+
+	*  Avoid some rare case null dereference (geogriffin@jsgriff.com)
+
+	*  Improve expiration check for simultaneous probes
+
+
+2012-11-19  Dmitry Butskoy  <Dmitry@Butskoy.name> - 2.0.19
+
+	*  DCCP protocol support (rfc4340), by Samuel Jero
+
+	   Use "-D" option for it (the protocol-specific options
+	   are available too).
+
+	*  Update COPYING and COPYING.LIB license files to the latest
+	   published ones (due to FSF address changes etc.) (Jan Synacek)
+
+	*  Add mention of "-l" option to manual (Filip Holec)
+
+
 2011-08-16  Dmitry Butskoy  <Dmitry@Butskoy.name> - 2.0.18
 
 	*  Handle new dgram icmp sockets ("echo ping sockets"),

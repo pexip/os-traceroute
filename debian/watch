@@ -1,0 +1,4 @@
+version=3
+opts=dversionmangle=s/\+dfsg\d*$//,uversionmangle=s/_/./g;s/(\d)[_\.\-\+]?((RC|rc|pre|dev|beta|alpha|b|a)[\-\.]?\d*)$/$1~$2/ \
+http://qa.debian.org/watch/sf.php/traceroute/traceroute-(\d.*)\.(?:tgz|tbz2|txz|tar\.(?:gz|bz2|xz))
+# Bart Martens <bartm@debian.org>  Sun, 06 Jan 2013 21:26:02 +0000
