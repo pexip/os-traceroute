@@ -120,7 +120,7 @@ static int set_tcp_flags (CLIF_option *optn, char *arg) {
 
 static int set_flag (CLIF_option *optn, char *arg) {
 
-	flags |= (unsigned int) optn->data;
+	flags |= (unsigned long) optn->data;
 
 	return 0;
 }

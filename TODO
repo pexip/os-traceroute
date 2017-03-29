@@ -29,7 +29,7 @@
   some cmdline option or even external hook...
 
 
-* Think about SCTP and DCCP methods (these protocols are already in kernel).
+* Think about SCTP method.
 
 
 * Think about "multicast tracerouting" (mrouted(8) and other).
