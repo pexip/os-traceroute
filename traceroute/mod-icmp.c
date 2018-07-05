@@ -9,7 +9,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/socket.h>
-#include <sys/poll.h>
+#include <poll.h>
 #include <netinet/icmp6.h>
 #include <netinet/ip_icmp.h>
 #include <netinet/in.h>
@@ -20,8 +20,8 @@
 
 
 static sockaddr_any dest_addr = {{ 0, }, };
-static u_int16_t seq = 1;
-static u_int16_t ident = 0;
+static uint16_t seq = 1;
+static uint16_t ident = 0;
 
 static char *data;
 static size_t *length_p;
@@ -173,7 +173,7 @@ static probe *icmp_check_reply (int sk, int err, sockaddr_any *from,
 						    char *buf, size_t len) {
 	int af = dest_addr.sa.sa_family;
 	int type;
-	u_int16_t recv_id, recv_seq;
+	uint16_t recv_id, recv_seq;
 	probe *pb;
 
 
