@@ -9,7 +9,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/socket.h>
-#include <sys/poll.h>
+#include <poll.h>
 #include <netinet/ip.h>
 #include <netinet/ip6.h>
 #include <linux/dccp.h>
@@ -30,7 +30,7 @@ static unsigned int dest_port = 0;
 static int raw_sk = -1;
 static int last_ttl = 0;
 
-static u_int8_t buf[1024];	/*  enough, enough...  */
+static uint8_t buf[1024];	/*  enough, enough...  */
 static size_t csum_len = 0;
 static struct dccp_hdr *dh = NULL;
 static struct dccp_hdr_ext *dhe = NULL;
@@ -51,8 +51,8 @@ static int dccp_init (const sockaddr_any *dest,
 	int af = dest->sa.sa_family;
 	sockaddr_any src;
 	socklen_t len;
-	u_int8_t *ptr;
-	u_int16_t *lenp;
+	uint8_t *ptr;
+	uint16_t *lenp;
 
 
 	dest_addr = *dest;
@@ -117,10 +117,10 @@ static int dccp_init (const sockaddr_any *dest,
 		ptr += len;
 	}
 
-	lenp = (u_int16_t *) ptr;
-	ptr += sizeof (u_int16_t);
-        *((u_int16_t *) ptr) = htons ((u_int16_t) IPPROTO_DCCP);
-        ptr += sizeof (u_int16_t);
+	lenp = (uint16_t *) ptr;
+	ptr += sizeof (uint16_t);
+	*((uint16_t *) ptr) = htons ((uint16_t) IPPROTO_DCCP);
+	ptr += sizeof (uint16_t);
 
 
 	/*  Construct DCCP header   */
@@ -153,7 +153,7 @@ static int dccp_init (const sockaddr_any *dest,
 	if (csum_len > sizeof (buf))
 		error ("impossible");	/*  paranoia   */
 
-	len = ptr - (u_int8_t *) dh;
+	len = ptr - (uint8_t *) dh;
 	if (len & 0x03)  error ("impossible");  /*  as >>2 ...  */
 
 	*lenp = htons (len);
@@ -232,7 +232,7 @@ static probe *dccp_check_reply (int sk, int err, sockaddr_any *from,
 						    char *buf, size_t len) {
 	probe *pb;
 	struct dccp_hdr *ndh = (struct dccp_hdr *) buf;
-	u_int16_t sport, dport;
+	uint16_t sport, dport;
 
 
 	if (len < 8)  return NULL;	    /*  too short   */
@@ -283,7 +283,6 @@ static tr_module dccp_ops = {
 	.send_probe = dccp_send_probe,
 	.recv_probe = dccp_recv_probe,
 	.expire_probe = dccp_expire_probe,
-	.one_per_time = 0,
 	.options = dccp_options,
 };
 

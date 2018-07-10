@@ -92,7 +92,7 @@ const char *get_as_path (const char *query);
 int raw_can_connect (void);
 
 unsigned int random_seq (void);
-u_int16_t in_csum (const void *ptr, size_t len);
+uint16_t in_csum (const void *ptr, size_t len);
 
 
 void tr_register_module (tr_module *module);

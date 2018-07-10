@@ -10,7 +10,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/socket.h>
-#include <sys/poll.h>
+#include <poll.h>
 #include <netinet/icmp6.h>
 #include <netinet/ip_icmp.h>
 #include <netinet/in.h>
@@ -33,11 +33,11 @@ static unsigned int dest_port = 0;
 static int raw_sk = -1;
 static int last_ttl = 0;
 
-static u_int8_t buf[1024];	    /*  enough, enough...  */
+static uint8_t buf[1024];	    /*  enough, enough...  */
 static size_t csum_len = 0;
 static struct tcphdr *th = NULL;
 
-#define TH_FLAGS(TH)	(((u_int8_t *) (TH))[13])
+#define TH_FLAGS(TH)	(((uint8_t *) (TH))[13])
 #define TH_FIN	0x01
 #define TH_SYN	0x02
 #define TH_RST	0x04
@@ -50,6 +50,7 @@ static struct tcphdr *th = NULL;
 
 static int flags = 0;	    /*  & 0xff == tcp_flags ...  */
 static int sysctl = 0;
+static int reuse = 0;
 static unsigned int mss = 0;
 static int info = 0;
 
@@ -140,16 +141,19 @@ static CLIF_option tcp_options[] = {
 	{ 0, "ecn", 0, "Send syn packet with tcp flags ECE and CWR "
 			"(for Explicit Congestion Notification, rfc3168)",
 				set_flag, (void *) FL_ECN, 0, 0 },
-	{ 0, "sack", 0, "Use sack option for tcp",
+	{ 0, "sack", 0, "Use sack,",
 				set_flag, (void *) FL_SACK, 0, 0 },
-	{ 0, "timestamps", 0, "Use timestamps option for tcp",
+	{ 0, "timestamps", 0, "timestamps,",
 				set_flag, (void *) FL_TSTAMP, 0, CLIF_ABBREV },
-	{ 0, "window_scaling", 0, "Use window_scaling option for tcp",
+	{ 0, "window_scaling", 0, "window_scaling option for tcp",
 				set_flag, (void *) FL_WSCALE, 0, CLIF_ABBREV },
 	{ 0, "sysctl", 0, "Use current sysctl (/proc/sys/net/*) setting "
 			"for the tcp options and ecn. Always set by default "
 			"(with \"syn\") if nothing else specified",
 				CLIF_set_flag, &sysctl, 0, 0 },
+	{ 0, "reuse", 0, "Allow to reuse local port numbers "
+			"for the huge workloads (SO_REUSEADDR)",
+				CLIF_set_flag, &reuse, 0, 0 },
 	{ 0, "mss", "NUM", "Use value of %s for maxseg tcp option (when syn)",
 				CLIF_set_uint, &mss, 0, 0 },
 	{ 0, "info", 0, "Print tcp flags of final tcp replies when target "
@@ -164,7 +168,7 @@ static CLIF_option tcp_options[] = {
 static int check_sysctl (const char *name) {
 	int fd, res;
 	char buf[sizeof (SYSCTL_PREFIX) + strlen (name) + 1];
-	u_int8_t ch;
+	uint8_t ch;
 
 	strcpy (buf, SYSCTL_PREFIX);
 	strcat (buf, name);
@@ -191,8 +195,8 @@ static int tcp_init (const sockaddr_any *dest,
 	sockaddr_any src;
 	int mtu;
 	socklen_t len;
-	u_int8_t *ptr;
-	u_int16_t *lenp;
+	uint8_t *ptr;
+	uint16_t *lenp;
 
 
 	dest_addr = *dest;
@@ -286,10 +290,10 @@ static int tcp_init (const sockaddr_any *dest,
 	    ptr += len;
 	}
 
-	lenp = (u_int16_t *) ptr;
-	ptr += sizeof (u_int16_t);
-	*((u_int16_t *) ptr) = htons ((u_int16_t) IPPROTO_TCP);
-	ptr += sizeof (u_int16_t);
+	lenp = (uint16_t *) ptr;
+	ptr += sizeof (uint16_t);
+	*((uint16_t *) ptr) = htons ((uint16_t) IPPROTO_TCP);
+	ptr += sizeof (uint16_t);
 
 
 	/*  Construct TCP header   */
@@ -309,13 +313,13 @@ static int tcp_init (const sockaddr_any *dest,
 
 	/*  Build TCP options   */
 
-	ptr = (u_int8_t *) (th + 1);
+	ptr = (uint8_t *) (th + 1);
 
 	if (flags & TH_SYN) {
 	    *ptr++ = TCPOPT_MAXSEG;	/*  2   */
 	    *ptr++ = TCPOLEN_MAXSEG;	/*  4   */
-	    *((u_int16_t *) ptr) = htons (mss ? mss : mtu);
-	    ptr += sizeof (u_int16_t);
+	    *((uint16_t *) ptr) = htons (mss ? mss : mtu);
+	    ptr += sizeof (uint16_t);
 	}
 
 	if (flags & FL_TSTAMP) {
@@ -330,10 +334,10 @@ static int tcp_init (const sockaddr_any *dest,
 	    *ptr++ = TCPOPT_TIMESTAMP;	/*  8   */
 	    *ptr++ = TCPOLEN_TIMESTAMP;	/*  10  */
 
-	    *((u_int32_t *) ptr) = random_seq ();	/*  really!  */
-	    ptr += sizeof (u_int32_t);
-	    *((u_int32_t *) ptr) = (flags & TH_ACK) ? random_seq () : 0;
-	    ptr += sizeof (u_int32_t);
+	    *((uint32_t *) ptr) = random_seq ();	/*  really!  */
+	    ptr += sizeof (uint32_t);
+	    *((uint32_t *) ptr) = (flags & TH_ACK) ? random_seq () : 0;
+	    ptr += sizeof (uint32_t);
 	}
 	else if (flags & FL_SACK) {
 	    *ptr++ = TCPOPT_NOP;	/*  1   */
@@ -355,7 +359,7 @@ static int tcp_init (const sockaddr_any *dest,
 	if (csum_len > sizeof (buf))
 		error ("impossible");	/*  paranoia   */
 
-	len = ptr - (u_int8_t *) th;
+	len = ptr - (uint8_t *) th;
 	if (len & 0x03)  error ("impossible");	/*  as >>2 ...  */
 
 	*lenp = htons (len);
@@ -381,6 +385,9 @@ static void tcp_send_probe (probe *pb, int ttl) {
 
 	sk = socket (af, SOCK_STREAM, 0);
 	if (sk < 0)  error ("socket");
+
+	if (reuse && setsockopt (sk, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse)) < 0)
+		error ("setsockopt SO_REUSEADDR");
 
 	bind_socket (sk);
 
@@ -436,7 +443,7 @@ static probe *tcp_check_reply (int sk, int err, sockaddr_any *from,
 						    char *buf, size_t len) {
 	probe *pb;
 	struct tcphdr *tcp = (struct tcphdr *) buf;
-	u_int16_t sport, dport;
+	uint16_t sport, dport;
 
 
 	if (len < 8)  return NULL;	    /*  too short   */

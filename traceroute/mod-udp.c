@@ -10,7 +10,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/socket.h>
-#include <sys/poll.h>
+#include <poll.h>
 #include <netinet/in.h>
 #include <netinet/udp.h>
 
@@ -71,7 +71,7 @@ static int udp_init (const sockaddr_any *dest,
 	dest_addr = *dest;
 
 	if (!port_seq)  port_seq = DEF_UDP_PORT;
-	dest_addr.sin.sin_port = htons ((u_int16_t) port_seq);
+	dest_addr.sin.sin_port = htons ((uint16_t) port_seq);
 	
 	fill_data (packet_len_p);
  
@@ -107,7 +107,7 @@ static int udplite_init (const sockaddr_any *dest,
 	dest_addr = *dest;
 
 	if (!port_seq)  port_seq = DEF_UDP_PORT;    /*  XXX: Hmmm...   */
-	dest_addr.sin.sin_port = htons ((u_int16_t) port_seq);
+	dest_addr.sin.sin_port = htons ((uint16_t) port_seq);
 
 	protocol = IPPROTO_UDPLITE;
 

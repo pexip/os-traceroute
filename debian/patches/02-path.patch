@@ -1,5 +1,7 @@
 Author: Daniel Baumann <mail@daniel-baumann.ch>
 Description: Adjust path.
+Reviewed-By: Laszlo Boszormenyi (GCS) <gcs@debian.org>
+Last-Update: 2016-03-09
 
 diff -Naurp traceroute.orig/wrappers/lft traceroute/wrappers/lft
 --- traceroute.orig/wrappers/lft	2008-04-21 18:54:41.000000000 +0200
@@ -14,9 +16,9 @@ diff -Naurp traceroute.orig/wrappers/lft traceroute/wrappers/lft
 diff -Naurp traceroute.orig/wrappers/tcptraceroute traceroute/wrappers/tcptraceroute
 --- traceroute.orig/wrappers/tcptraceroute	2008-04-21 18:54:46.000000000 +0200
 +++ traceroute/wrappers/tcptraceroute	2008-05-03 09:18:47.000000000 +0200
-@@ -68,5 +68,5 @@ shift
-     shift
- }
+@@ -74,5 +74,5 @@ echo "Running:
+ 	traceroute $opts $host $length" >&2
+ 
  
 -exec traceroute $opts $host $length
 +exec /usr/bin/traceroute.db $opts $host $length
@@ -35,7 +37,7 @@ diff -Naurp traceroute.orig/wrappers/traceproto traceroute/wrappers/traceproto
 diff -Naurp traceroute.orig/wrappers/traceroute-nanog traceroute/wrappers/traceroute-nanog
 --- traceroute.orig/wrappers/traceroute-nanog	2008-04-21 18:55:17.000000000 +0200
 +++ traceroute/wrappers/traceroute-nanog	2008-05-03 09:18:47.000000000 +0200
-@@ -71,5 +71,5 @@ done
+@@ -72,5 +72,5 @@ done
  
  [ -z "$spray" ] && opts="$opts -N 1"
  
