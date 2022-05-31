@@ -6,7 +6,7 @@ XSBC-Pexip-Original-Maintainer: Laszlo Boszormenyi (GCS) <gcs@debian.org>
 Build-Depends: debhelper (>= 9)
 Standards-Version: 3.9.8
 Homepage: http://traceroute.sourceforge.net/
-XS-Pexip-Upstream: http://ftp.debian.org/debian/ buster
+XS-Pexip-Upstream: http://deb.debian.org/debian/ bullseye
 
 Package: traceroute
 Architecture: linux-any
