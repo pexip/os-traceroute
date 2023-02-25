@@ -5,4 +5,4 @@
 05-manpage-p.patch
 06-build.patch
 07-reproducible-build.patch
-08-interpret_ipv4-mapped_ipv6_addresses.patch
+08-manpage-update.patch

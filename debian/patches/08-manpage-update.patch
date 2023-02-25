@@ -1,0 +1,172 @@
+Description: fix lines with a misused two-fonts macro in manpage
+Author: Bjarni Ingi Gislason <bjarniig@rhi.hi.is>
+Last-Update: 2019-08-19
+
+--- traceroute.orig/traceroute/traceroute.8	2019-08-19 19:07:42.000000000 +0000
++++ traceroute/traceroute/traceroute.8.new	2019-08-19 19:26:05.000000000 +0000
+@@ -27,13 +27,13 @@ traceroute \- print the route packets tr
+ .ti +8
+ .BR host " [" "packet_len" "]"
+ .br
+-.BR traceroute6
++.B traceroute6
+ .RI " [" options ]
+ .br
+-.BR tcptraceroute
++.B tcptraceroute
+ .RI " [" options ]
+ .br
+-.BR lft
++.B lft
+ .RI " [" options ]
+ .ad
+ .SH DESCRIPTION
+@@ -122,7 +122,7 @@ and source/destination port, in order to
+ by firewalls just as a start of allowed type of a network session).
+ .SH OPTIONS
+ .TP
+-.BI \--help
++.B \-\-help
+ Print help info and exit.
+ .TP
+ .BR \-4 ", " \-6
+@@ -173,14 +173,14 @@ Specifies with what TTL to start. Defaul
+ Tells traceroute to add an IP source routing option to the outgoing
+ packet that tells the network to route the packet through the
+ specified
+-.IR gateway
++.I gateway
+ (most routers have disabled source routing for security reasons).
+ In general, several
+-.IR gateway\fR's
++.IR gateway 's
+ is allowed (comma separated). For IPv6, the form of
+-.IR num\fB,\fIaddr\fB,\fIaddr...
++.IB num , addr , addr...
+ is allowed, where
+-.IR num
++.I num
+ is a route header type (default is type 2). Note the type 0 route header
+ is now deprecated (rfc5095).
+ .TP
+@@ -204,7 +204,7 @@ considerably. The default value is 16.
+ Note that some routers and hosts can use ICMP rate throttling. In such
+ a situation specifying too large number can lead to loss of some responses.
+ .TP
+-.BI \-n
++.B \-n
+ Do not try to map IP addresses to host names when displaying them.
+ .TP
+ .BI \-p " port" ", --port=" port
+@@ -236,13 +236,13 @@ Determines how long to wait for a respon
+ .br
+ There are three (in general) float values separated by a comma
+ (or a slash).
+-.IR Max
++.I Max
+ specifies the maximum time (in seconds, default 5.0) to wait, in any case.
+ .br
+ 
+ .br
+ Traditional traceroute implementation always waited whole
+-.IR max
++.I max
+ seconds for any probe. But if we already have some replies from the
+ .B same
+ hop, or even from some
+@@ -253,15 +253,15 @@ to determine the actual reasonable amoun
+ 
+ .br
+ The optional
+-.IR here
++.I here
+ (default 3.0) specifies a factor to multiply the round trip time of an already
+ received response from the
+ .B same
+ hop. The resulting value is used as a timeout for the probe, instead of 
+ (but no more than)
+-.IR max\fR.
++.IR max .
+ The optional
+-.IR near
++.I near
+ (default 10.0) specifies a similar factor for a response from some
+ .B next
+ hop.
+@@ -275,24 +275,24 @@ hop (of the probe which will be printed
+ If nothing found, then look for some
+ .B next
+ hop. If nothing found, use
+-.IR max\fR.
++.IR max .
+ If
+-.IR here
++.I here
+ and/or
+-.IR near
++.I near
+ have zero values, the corresponding computation is skipped.
+ .br
+-.IR Here
++.I Here
+ and
+-.IR near
++.I near
+ are always set to zero if only
+-.IR max
++.I max
+ is specified (for compatibility with previous versions).
+ .TP
+ .BI \-q " nqueries" ", --queries=" nqueries
+ Sets the number of probe packets per hop. The default is 3.
+ .TP
+-.BI \-r
++.B \-r
+ Bypass the normal routing tables and send directly to a host on
+ an attached network.  If the host is not on a directly-attached
+ network, an error is returned.  This option can be used to ping a
+@@ -370,7 +370,7 @@ To print information about available opt
+ Use UDP to particular destination port for tracerouting (instead of increasing
+ the port per each probe). Default port is 53 (dns).
+ .TP
+-.BI \-UL
++.B \-UL
+ Use UDPLITE for tracerouting (default port is 53).
+ .TP
+ .B \-D, \-\-dccp
+@@ -380,7 +380,7 @@ Use DCCP Requests for probes.
+ Use raw packet of specified protocol for tracerouting. Default protocol is
+ 253 (rfc3692).
+ .TP
+-.BI \--mtu
++.B \-\-mtu
+ Discover MTU along the path being traced. Implies
+ .BR \-F\ \-N\ 1 .
+ New
+@@ -406,7 +406,7 @@ See
+ .B \-F
+ option for more info.
+ .TP
+-.BI \--back
++.B \-\-back
+ Print the number of backward hops when it seems different with the forward
+ direction. This number is guessed in assumption that remote hops send reply
+ packets with initial ttl set to either 64, or 128 or 255 (which seems
+@@ -437,7 +437,7 @@ This method may be allowed for unprivile
+ since the kernel 3.0 (IPv4, for IPv6 since 3.11), which supports new
+ .I dgram icmp
+ (or
+-.IR \fR"\fIping\fR")
++.RI """" ping """)"
+ sockets. To allow such sockets, sysadmin should provide
+ .I net/ipv4/ping_group_range
+ sysctl range to match any group of the user.
+@@ -555,7 +555,7 @@ Options:
+ .TP
+ .B service\fR=\fInum
+ Set DCCP service code to
+-.IR num
++.I num
+ (default is 1885957735).
+ .SS raw \  \  \  \ \-P proto
+ Send raw packet of protocol

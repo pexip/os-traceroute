@@ -47,10 +47,7 @@ override_dh_auto_install:
 		ln -s ../man1/traceroute.db.1.gz debian/traceroute/usr/share/man/man8/$${_WRAPPER}.db.8.gz; \
 	done
 
-override_dh_builddeb:
-	dh_builddeb -- -Zxz -z9
-
 %:
-	dh ${@} --parallel
+	dh ${@}
 
-.PHONY: override_dh_auto_build override_dh_auto_install override_dh_builddeb
+.PHONY: override_dh_auto_build override_dh_auto_install
