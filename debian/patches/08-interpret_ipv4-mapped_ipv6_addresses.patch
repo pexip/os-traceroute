@@ -1,0 +1,18 @@
+--- a/traceroute/traceroute.c	2016-03-07 23:17:23.000000000 +0100
++++ b/traceroute/traceroute.c	2022-12-27 01:28:15.000000000 +0100
+@@ -223,6 +223,15 @@
+ 
+ 	freeaddrinfo (res);
+ 
++	/*  No v4mapped addresses in real network, interpret it as ipv4 anyway   */
++	if (addr->sa.sa_family == AF_INET6 &&
++	    IN6_IS_ADDR_V4MAPPED (&addr->sin6.sin6_addr)
++	) {
++	    if (af == AF_INET6)  return -1;
++	    addr->sa.sa_family = AF_INET;
++	    addr->sin.sin_addr.s_addr = addr->sin6.sin6_addr.s6_addr32[3];
++	}
++
+ 	return 0;
+ }
+ 

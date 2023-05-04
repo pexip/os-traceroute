@@ -1,3 +1,16 @@
+traceroute (1:2.1.0-2+deb11u1pexip1) pexip; urgency=medium
+
+  * New upstream release
+
+ -- Steve McIntyre <steve.mcintyre@pexip.com>  Thu, 04 May 2023 18:24:01 +0100
+
+traceroute (1:2.1.0-2+deb11u1) bullseye; urgency=medium
+
+  * Backport upstream fix to interpret ipv4-mapped ipv6 addresses
+    (::ffff:A.B.C.D) as true ipv4.
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.org>  Thu, 29 Dec 2022 08:27:50 +0100
+
 traceroute (1:2.1.0-2pexip5) pexip-bullseye; urgency=medium
 
   * Bullseye rebuild for ARM64 inclusion
