@@ -223,6 +223,15 @@ static int getaddr (const char *name, sockaddr_any *addr) {
 
 	freeaddrinfo (res);
 
+	/*  No v4mapped addresses in real network, interpret it as ipv4 anyway   */
+	if (addr->sa.sa_family == AF_INET6 &&
+	    IN6_IS_ADDR_V4MAPPED (&addr->sin6.sin6_addr)
+	) {
+	    if (af == AF_INET6)  return -1;
+	    addr->sa.sa_family = AF_INET;
+	    addr->sin.sin_addr.s_addr = addr->sin6.sin6_addr.s6_addr32[3];
+	}
+
 	return 0;
 }
 
@@ -1645,7 +1654,7 @@ int do_send (int sk, const void *data, size_t len, const sockaddr_any *addr) {
 	if (res < 0) {
 	    if (errno == ENOBUFS || errno == EAGAIN)
 		    return res;
-	    if (errno == EMSGSIZE)
+	    if (errno == EMSGSIZE || errno == EHOSTUNREACH)
 		    return 0;	/*  recverr will say more...  */
 	    error ("send");	/*  not recoverable   */
 	}

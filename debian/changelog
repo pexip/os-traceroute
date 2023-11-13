@@ -1,15 +1,39 @@
+traceroute (1:2.1.2-1) unstable; urgency=medium
+
+  * New upstream release.
+  * Update Standards-Version to 4.6.2 .
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.org>  Sat, 25 Feb 2023 13:24:47 +0100
+
+traceroute (1:2.1.1-1) unstable; urgency=medium
+
+  * New upstream release.
+  * Update watch file.
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.org>  Wed, 28 Dec 2022 19:14:31 +0100
+
+traceroute (1:2.1.0-3) unstable; urgency=medium
+
+  * Add patch for fixing lines with a misused two-fonts macro in manpage
+    (closes: #935132).
+  * Update debhelper level to 13 .
+  * Update Standards-Version to 4.6.1 .
+  * Update watch file.
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.org>  Thu, 14 Jul 2022 01:42:56 +0200
+
+traceroute (1:2.1.0-2.1) unstable; urgency=medium
+
+  * Non maintainer upload by the Reproducible Builds team.
+  * No source change upload to rebuild on buildd with .buildinfo files.
+
+ -- Holger Levsen <holger@debian.org>  Wed, 13 Jul 2022 17:30:36 +0200
+
 traceroute (1:2.1.0-2+deb11u1pexip1) pexip; urgency=medium
 
   * New upstream release
 
  -- Steve McIntyre <steve.mcintyre@pexip.com>  Thu, 04 May 2023 18:24:01 +0100
-
-traceroute (1:2.1.0-2+deb11u1) bullseye; urgency=medium
-
-  * Backport upstream fix to interpret ipv4-mapped ipv6 addresses
-    (::ffff:A.B.C.D) as true ipv4.
-
- -- Laszlo Boszormenyi (GCS) <gcs@debian.org>  Thu, 29 Dec 2022 08:27:50 +0100
 
 traceroute (1:2.1.0-2pexip5) pexip-bullseye; urgency=medium
 
