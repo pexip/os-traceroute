@@ -1,6 +1,6 @@
 /*
     Copyright (c)  2006, 2007		Dmitry Butskoy
-					<buc@citadel.stu.neva.ru>
+					<dmitry@butskoy.name>
     License:  GPL v2 or any later
 
     See COPYING for the status of this software.
@@ -22,7 +22,7 @@ static void __init_random_seq (void) {
 
 unsigned int random_seq (void) {
 
-	/*  To not worry about RANDOM_MAX and precision...  */
+	/*  Not to worry about RANDOM_MAX and precision...  */
 	return  (rand () << 16) ^ (rand () << 8) ^ rand () ^ (rand () >> 8);
 }
 

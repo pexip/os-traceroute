@@ -1,11 +1,12 @@
 /*
     Copyright (c)  2006, 2007		Dmitry Butskoy
-					<buc@citadel.stu.neva.ru>
+					<dmitry@butskoy.name>
     License:  GPL v2 or any later
 
     See COPYING for the status of this software.
 */
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -24,6 +25,11 @@
 
 #ifndef IP_MTU
 #define IP_MTU	14
+#endif
+
+#ifndef TCPOPT_FASTOPEN
+#define TCPOPT_FASTOPEN  34
+#define TCPOLEN_FASTOPEN_BASE	2
 #endif
 
 
@@ -51,8 +57,10 @@ static struct tcphdr *th = NULL;
 static int flags = 0;	    /*  & 0xff == tcp_flags ...  */
 static int sysctl = 0;
 static int reuse = 0;
-static unsigned int mss = 0;
+static int mss = -1;
+static int check_mss = 0;
 static int info = 0;
+static int fastopen = 0;
 
 #define FL_FLAGS	0x0100
 #define FL_ECN		0x0200
@@ -75,14 +83,24 @@ static struct {
 	{ "cwr", TH_CWR },
 };
 
-static char *names_by_flags (unsigned int flags) {
+
+static char *print_tcp_info (struct tcphdr *tcp, size_t len) {
 	int i;
-	char str[64];	/*  enough...  */
+	char str[128];	/*  enough...  */
 	char *curr = str;
-	char *end = str + sizeof (str) / sizeof (*str);
+	char *end = str + (sizeof (str) / sizeof (*str) - 1);
+	const char *p;
+	unsigned int flags;
+	uint8_t *ptr;
+
+	if (len < sizeof (struct tcphdr) ||
+	    len != tcp->doff << 2
+	)  return NULL;
+
+
+	flags = TH_FLAGS(tcp);
 
 	for (i = 0; i < sizeof (tcp_flags) / sizeof (*tcp_flags); i++) {
-	    const char *p;
 
 	    if (!(flags & tcp_flags[i].flag))  continue;
 
@@ -90,10 +108,47 @@ static char *names_by_flags (unsigned int flags) {
 	    for (p = tcp_flags[i].name; *p && curr < end; *curr++ = *p++) ;
 	}
 
+
+	ptr = (uint8_t *) (tcp + 1);
+	len -= sizeof (struct tcphdr);
+
+	while (len > 1) {
+	    int op = *ptr, oplen = ptr[1];
+	    char buf[16];
+	    const char *name = NULL;
+
+	    switch (op) {
+		case TCPOPT_EOL:  len = 0;  continue;	/*  no more...  */
+		case TCPOPT_NOP:  oplen = 1; break;
+		case TCPOPT_MAXSEG:
+		    if (oplen == TCPOLEN_MAXSEG && oplen <= len) {
+			uint16_t rcv_mss = ntohs (*((uint16_t *) (ptr + 2)));
+			snprintf (buf, sizeof (buf), "mss=%u", rcv_mss);
+			name = buf;
+		    }
+		    break;
+		case TCPOPT_SACK_PERMITTED:  if (oplen == TCPOLEN_SACK_PERMITTED)  name = "sack";  break;
+		case TCPOPT_TIMESTAMP:  if (oplen == TCPOLEN_TIMESTAMP)  name = "timestamps";  break;
+		case TCPOPT_WINDOW:  if (oplen == TCPOLEN_WINDOW)  name = "window_scaling";  break;
+		case TCPOPT_FASTOPEN:  if (oplen >= TCPOLEN_FASTOPEN_BASE)  name = "fastopen";  break;
+	    }
+
+	    if (name) {
+		if (curr > str && curr < end)  *curr++ = ',';
+		for (p = name; *p && curr < end; *curr++ = *p++) ;
+	    }
+
+	    if (len < oplen)  break;
+	    len -= oplen;
+	    ptr += oplen;
+	}
+
+
 	*curr = '\0';
 
 	return  strdup (str);
 }
+
 
 static int set_tcp_flag (CLIF_option *optn, char *arg) {
 	int i;
@@ -126,6 +181,16 @@ static int set_flag (CLIF_option *optn, char *arg) {
 	return 0;
 }
 
+static int set_mss (CLIF_option *optn, char *arg) {
+
+	check_mss = 1;
+
+	if (arg)
+	    return CLIF_set_uint (optn, arg);
+
+	return 0;
+}
+
 static CLIF_option tcp_options[] = {
 	{ 0, "syn", 0, "Set tcp flag SYN (default if no other "
 			"tcp flags specified)", set_tcp_flag, 0, 0, 0 },
@@ -148,16 +213,19 @@ static CLIF_option tcp_options[] = {
 	{ 0, "window_scaling", 0, "window_scaling option for tcp",
 				set_flag, (void *) FL_WSCALE, 0, CLIF_ABBREV },
 	{ 0, "sysctl", 0, "Use current sysctl (/proc/sys/net/*) setting "
-			"for the tcp options and ecn. Always set by default "
+			"for the tcp options above and ecn. Always set by default "
 			"(with \"syn\") if nothing else specified",
 				CLIF_set_flag, &sysctl, 0, 0 },
+	{ 0, "fastopen", 0, "Use fastopen tcp option (when syn, cookie negotiation only)",
+				CLIF_set_flag, &fastopen, 0, 0 },
 	{ 0, "reuse", 0, "Allow to reuse local port numbers "
 			"for the huge workloads (SO_REUSEADDR)",
 				CLIF_set_flag, &reuse, 0, 0 },
-	{ 0, "mss", "NUM", "Use value of %s for maxseg tcp option (when syn)",
-				CLIF_set_uint, &mss, 0, 0 },
-	{ 0, "info", 0, "Print tcp flags of final tcp replies when target "
-			"host is reached. Useful to determine whether "
+	{ 0, "mss", "NUM", "Use value of %s (or unchanged) for maxseg tcp option (when syn), "
+			"and discover its clamping along the path being traced",
+				set_mss, &mss, 0, CLIF_OPTARG },
+	{ 0, "info", 0, "Print tcp flags and options of final tcp replies "
+			"when target host is reached. Useful to determine whether "
 			"an application listens the port etc.",
 				CLIF_set_flag, &info, 0, 0 },
 	CLIF_END_OPTION
@@ -231,6 +299,8 @@ static int tcp_init (const sockaddr_any *dest,
 	/*  mss = mtu - headers   */
 	mtu -= af == AF_INET ? sizeof (struct iphdr) : sizeof (struct ip6_hdr);
 	mtu -= sizeof (struct tcphdr);
+
+	if (mss < 0)  mss = mtu;
 
 
 	if (!raw_can_connect ()) {	/*  work-around for buggy kernels  */
@@ -318,7 +388,7 @@ static int tcp_init (const sockaddr_any *dest,
 	if (flags & TH_SYN) {
 	    *ptr++ = TCPOPT_MAXSEG;	/*  2   */
 	    *ptr++ = TCPOLEN_MAXSEG;	/*  4   */
-	    *((uint16_t *) ptr) = htons (mss ? mss : mtu);
+	    *((uint16_t *) ptr) = htons (mss);
 	    ptr += sizeof (uint16_t);
 	}
 
@@ -351,6 +421,19 @@ static int tcp_init (const sockaddr_any *dest,
 	    *ptr++ = TCPOPT_WINDOW;	/*  3   */
 	    *ptr++ = TCPOLEN_WINDOW;	/*  3   */
 	    *ptr++ = 2;	/*  assume some corect value...  */
+	}
+
+	if (fastopen && (flags & TH_SYN)) {
+	    *ptr++ = TCPOPT_FASTOPEN;	/*  34  */
+	    if (flags & TH_ACK) {
+		/*  cookie size of 8 is defined in kernel's linux/tcp.h  */
+		*ptr++ = TCPOLEN_FASTOPEN_BASE + 2 * sizeof (uint32_t);
+		*((uint32_t *) ptr) = random_seq ();  ptr += sizeof (uint32_t);
+		*((uint32_t *) ptr) = random_seq ();  ptr += sizeof (uint32_t);
+	    } else
+		*ptr++ = TCPOLEN_FASTOPEN_BASE + 0;	/*  2   */
+	    *ptr++ = TCPOPT_NOP;	/*  1   */
+	    *ptr++ = TCPOPT_NOP;	/*  1   */
 	}
 
 
@@ -468,12 +551,28 @@ static probe *tcp_check_reply (int sk, int err, sockaddr_any *from,
 	if (!pb)  return NULL;
 
 
+	if (check_mss &&
+	    err &&
+	    len >= sizeof (*tcp) + TCPOLEN_MAXSEG
+	) {
+	    uint8_t *ptr = (uint8_t *) (tcp + 1);
+
+	    if (ptr[0] == TCPOPT_MAXSEG && ptr[1] == TCPOLEN_MAXSEG) {
+		uint16_t seen_mss = ntohs (*((uint16_t *) (ptr + 2)));
+		if (mss != seen_mss) {
+		    put_err (pb, "M=%u", seen_mss);
+		    mss = seen_mss;	/*  print just once   */
+		}
+	    }
+	}
+
+
 	if (!err) {
 
 	    pb->final = 1;
 
 	    if (info)
-		pb->ext = names_by_flags (TH_FLAGS(tcp));
+		pb->ext = print_tcp_info (tcp, len);
 	}
 
 	return pb;

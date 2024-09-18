@@ -3,7 +3,8 @@ Section: net
 Priority: important
 Maintainer: Laszlo Boszormenyi (GCS) <gcs@debian.org>
 Build-Depends: debhelper-compat (= 13)
-Standards-Version: 4.6.2
+Standards-Version: 4.7.0
+Rules-Requires-Root: no
 Homepage: https://traceroute.sourceforge.net/
 
 Package: traceroute
