@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 #   Copyright (c)  2007             Dmitry K. Butskoy
-#                                   <buc@citadel.stu.neva.ru>
+#                                   <dmitry@butskoy.name>
 #   License:  GPL v2 or any later
 #
 #   See COPYING for the status of this software.
@@ -38,7 +38,7 @@ warning () {
 }
  
 
-PARSED=`getopt 'cCTfAhvRp:d:D:s:S:m:M:w:W:a:P:F:k:I:H:i:o:t:' "$@"`
+PARSED=`getopt -- 'cCTfAhvRp:d:D:s:S:m:M:w:W:a:P:F:k:I:H:i:o:t:' "$@"`
 [ $? != 0 ] && exit 2
 
 eval set -- "$PARSED"

@@ -1,7 +1,52 @@
+2024-09-14  Dmitry Butskoy  <Dmitry@Butskoy.name> - 2.1.6
+
+	*  Let getaddrinfo(3) select the default IPv4 or IPv6 protocol version
+	   when it is not explicitly specified on the command line
+	   (Jan Macku, SF bug #16)
+
+	   No more mandatory default to IPv4, follow rfc3484 and
+	   the similar ping(1) behaviour. Drop DEF_AF macro.
+
+
+2023-12-18  Dmitry Butskoy  <Dmitry@Butskoy.name> - 2.1.5
+
+	*  Fix rfc5837 parsing (Francois Rigault)
+
+
+2023-12-13  Dmitry Butskoy  <Dmitry@Butskoy.name> - 2.1.4
+
+	*  Parse interface information (rfc5837) for ICMP extensions
+
+	*  Add `fastopen' tcp module option (cookie negotiation only)
+
+	*  Complete tcp module option `mss' to discover possible mss clamping
+	   along the path being traced (idea and testing from Francois Rigault).
+	   The argument is optional now.
+           
+	   Changed mss is printed once in a form of `M=NUM' at the first probe
+	   it was detected on. (Actually, the mss clamping performed by
+	   some previous hop).
+
+	   Note, some routers may return too short original fragment
+	   in the time exceeded message, making the check impossible.
+	   Besides that the responses may come in a different order.
+	   All this can lead to a later place of the report
+	   (using -N 1 can help for the order).
+
+	*  Complete tcp module option `info' to print returned tcp header options too
+	   (all those that can be set or altered by `-O' for tcp module).
+
+
+2023-08-30  Dmitry Butskoy  <Dmitry@Butskoy.name> - 2.1.3
+
+	*  Fix command line parsing in wrappers.
+
+
 2023-02-13  Dmitry Butskoy  <Dmitry@Butskoy.name> - 2.1.2
 
 	*  Fix unprivileged ICMP tracerouting with Linux kernel >= 6.1
 	   (Eric Dumazet, SF bug #14)
+
 
 2022-12-27  Dmitry Butskoy  <Dmitry@Butskoy.name> - 2.1.1
 
