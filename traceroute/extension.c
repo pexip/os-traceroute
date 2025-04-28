@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <ctype.h>
 
 #include "traceroute.h"
 
@@ -26,8 +27,11 @@ struct icmp_ext_object {
 	uint8_t data[0];
 };
 
-#define MPLS_CLASS 1
-#define MPLS_C_TYPE 1
+#define MPLS_CLASS	1
+#define MPLS_C_TYPE	1
+
+#define IFACE_INFO_CLASS	2
+#define IFACE_INFO_NAME_LEN	64
 
 
 #define do_snprintf(CURR, END, FMT, ARGS...)	\
@@ -35,6 +39,101 @@ struct icmp_ext_object {
 	    CURR += snprintf (CURR, END - CURR, (FMT), ## ARGS);\
 	    if (CURR > END)  CURR = END;			\
 	} while (0)
+
+
+/*	rfc 5837 stuff    */
+
+static int print_iface_info (struct icmp_ext_object *obj, char *buf, size_t length) {
+	uint32_t *ui;
+	char tmp[128];	/*  enough: 4 + (4 + 16) + 64 + 4 = 92   */
+	size_t data_len;
+	char *curr = buf, *end = buf + length;
+	char *start;
+	const char *roles[] = { "INC", "SUB", "OUT", "NXT" };
+
+
+	/*  Copy data into temporary array of enough length
+	   to avoid boundary checks on each step.
+	*/
+	data_len = ntohs (obj->length) - sizeof (*obj);
+	if (data_len > sizeof (tmp))  return 0;
+
+	memset (tmp, 0, sizeof (tmp));
+	memcpy (tmp, obj->data, data_len);
+
+	ui = (uint32_t *) tmp;
+
+
+	do_snprintf (curr, end, "%s:", roles[(obj->c_type >> 6) & 0x03]);
+	start = curr;
+
+	if (obj->c_type & 0x08)    /*  index   */
+		do_snprintf (curr, end, "%u", ntohl (*ui++));
+
+	if (obj->c_type & 0x04) {  /*  IP address   */
+	    sockaddr_any addr;
+	    void *ptr;
+	    size_t len;
+	    uint16_t afi = ntohl (*ui++) >> 16;
+
+	    memset (&addr, 0, sizeof (addr));
+
+	    if (afi == 1) {    /*  ipv4   */
+		addr.sa.sa_family = AF_INET;
+		ptr = &addr.sin.sin_addr;
+		len = sizeof (addr.sin.sin_addr);
+	    }
+	    else if (afi == 2) {  /*  ipv6   */
+		addr.sa.sa_family = AF_INET6;
+		ptr = &addr.sin6.sin6_addr;
+		len = sizeof (addr.sin6.sin6_addr);
+	    } else
+		return 0;
+
+	    memcpy (ptr, ui, len);
+	    ui += len / sizeof (*ui);
+
+	    do_snprintf (curr, end, "%s%s", (curr > start) ? "," : "", addr2str (&addr));
+	}
+
+	if (obj->c_type & 0x02) {	/*  name   */
+	    uint8_t *name = (uint8_t *) ui;
+	    uint8_t len = *name;
+	    char str[IFACE_INFO_NAME_LEN * 4];	    /*  enough...   */
+	    char *p = str;
+	    static char hex[16] = { '0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F' };
+	    int i;
+
+	    if (!len || (len % sizeof (uint32_t)) || len > IFACE_INFO_NAME_LEN)
+		    return 0;
+
+	    for (i = 1; i < len; i++) {	    /*  name[0] is length   */
+		int ch = name[i];
+
+		if (!ch)  break;
+		else if (!isascii (ch) || !isgraph (ch) || ch == '%' || ch == '"') {
+		    *p++ = '%';
+		    *p++ = hex[(ch >> 4) & 0x0f];
+		    *p++ = hex[ch & 0x0f];
+		} else
+		    *p++ = ch;
+	    }
+	    *p++ = '\0';
+
+	    do_snprintf (curr, end, "%s\"%s\"", (curr > start) ? "," : "", str);
+
+	    ui += len / sizeof (*ui);
+	}
+
+	if (obj->c_type & 0x01)    /*  mtu   */
+		do_snprintf (curr, end, "%smtu=%u", (curr > start) ? "," : "", ntohl (*ui++));
+
+
+	if (ui > (uint32_t *) (tmp + data_len))
+		return 0;
+
+	return  (curr - buf);
+}
 
 
 static int try_extension (probe *pb, char *buf, size_t len) {
@@ -80,7 +179,7 @@ static int try_extension (probe *pb, char *buf, size_t len) {
 	    if (obj->class == MPLS_CLASS &&
 		obj->c_type == MPLS_C_TYPE &&
 		n >= 1
-	    ) {    /*  people prefer MPLS to be parsed...  */
+	    ) {    /*  people prefer MPLS (rfc4950) to be parsed...  */
 
 		do_snprintf (curr, end, "MPLS:");
 
@@ -94,6 +193,12 @@ static int try_extension (probe *pb, char *buf, size_t len) {
 					(mpls >> 8) & 0x1,
 					mpls & 0xff);
 		}
+
+	    }
+	    else if (obj->class == IFACE_INFO_CLASS &&
+		     (i = print_iface_info (obj, curr, end - curr)) > 0
+	    ) {
+		curr += i;	/*  successfully parsed   */
 
 	    }
 	    else {	/*  common case...  */

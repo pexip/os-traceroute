@@ -298,7 +298,9 @@ The MPLS (rfc4950) is shown parsed, in a form:
 .B MPLS:L=\fIlabel\fB,E=\fIexp_use\fB,S=\fIstack_bottom\fB,T=\fITTL
 (more objects separated by
 .B /
-).
+). The Interface Information (rfc5837) is shown parsed as well, in a following form:
+.B \fR{\fBINC\fR|\fBSUB\fR|\fBOUT\fR|\fBNXT\fR}\fB:\fIindex\fB,\fIIP_addr\fB,"\fIname\fB",mtu=\fIMTU\fB
+(all four fields may be missing).
 .TP
 .B \-A, \-\-as\-path\-lookups
 Perform AS path lookups in routing registries and print results
@@ -483,16 +485,47 @@ setting for the tcp header options above and
 .BR ecn .
 Always set by default, if nothing else specified.
 .TP
-.B mss\fR=\fInum
+.B fastopen
+Use fastopen tcp option (when
+.BR syn ),
+for initial cookie negotiation only.
+.TP
+.B mss\fR=[\fInum\fR]
 Use value of
 .I num
-for maxseg tcp header option (when
-.BR syn ).
+(or unchanged) for maxseg tcp header option (when
+.BR syn ),
+and discover its clamping along the path being traced.
+New changed
+.I mss
+is printed once in a form of
+.B M=\fINUM
+at the first probe on which it was detected.
+Note, some routers may return too short original fragment
+in the time exceeded message, making the check impossible.
+Besides that the responses may come in a different order.
+All this can lead to a later place of the report
+(using 
+.BR \-N\ 1
+can help for the order).
 .TP
 .B info
-Print tcp flags of final tcp replies when the target host is reached.
+Print tcp flags and supported options
+of final tcp replies when the target host is reached.
 Allows to determine whether an application listens the port and
 other useful things.
+Supported tcp options are all that can be set by
+.BR \-T\ \-O ,
+ie. 
+.IR mss ,
+.IR sack ,
+.IR timestamps ,
+.IR window_scaling
+and
+.IR fastopen ,
+with the similar output format (a value for
+.IR mss
+and just presence for others).
 .P
 Default options is
 .BR syn,sysctl .

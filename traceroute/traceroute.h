@@ -1,6 +1,6 @@
 /*
     Copyright (c)  2006, 2007		Dmitry Butskoy
-					<buc@citadel.stu.neva.ru>
+					<dmitry@butskoy.name>
     License:  GPL v2 or any later
 
     See COPYING for the status of this software.
@@ -28,7 +28,7 @@ struct probe_struct {
 	int sk;
 	int seq;
 	char *ext;
-	char err_str[16];	/*  assume enough   */
+	char err_str[32];	/*  assume enough   */
 };
 typedef struct probe_struct probe;
 
@@ -58,8 +58,10 @@ typedef struct tr_module_struct tr_module;
 #define DEF_RAW_PROT	253	/*  for experimentation and testing, rfc3692  */
 
 
-void error (const char *str) __attribute__((noreturn));
-void error_or_perm (const char *str) __attribute__((noreturn));
+void error (const char *str) __attribute__ ((noreturn));
+void error_or_perm (const char *str) __attribute__ ((noreturn));
+void put_err (probe *pb, const char *format, ...) __attribute__ ((format (printf, 2, 3)));
+const char *addr2str (const sockaddr_any *addr);
 
 double get_time (void);
 void tune_socket (int sk);
