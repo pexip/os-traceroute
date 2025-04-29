@@ -1,3 +1,9 @@
+traceroute (1:2.1.6-1+pexip25u1) pexip-trixie; urgency=medium
+
+  * Initial trixie build
+
+ -- Mark Hymers <mark.hymers@pexip.com>  Tue, 29 Apr 2025 22:59:20 +0100
+
 traceroute (1:2.1.6-1) unstable; urgency=medium
 
   * New upstream release.
