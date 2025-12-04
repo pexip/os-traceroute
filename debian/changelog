@@ -1,3 +1,9 @@
+traceroute (1:2.1.6-1+pexip25u2) pexip-trixie; urgency=medium
+
+  * Trixie build for product distribution
+
+ -- Mark Hymers <mark.hymers@pexip.com>  Thu, 04 Dec 2025 14:01:19 +0000
+
 traceroute (1:2.1.6-1+pexip25u1) pexip-trixie; urgency=medium
 
   * Initial trixie build
